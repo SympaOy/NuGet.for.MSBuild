@@ -3,7 +3,7 @@
   <metadata minClientVersion="2.8">
     <id>NuGet.for.MSBuild</id>
     <title>NuGet for MSBuild</title>
-    <version>2.2.1000</version>
+    <version>2.2.1001</version>
     <authors>Jeff Winn</authors>
     <licenseUrl>http://nuget4msbuild.codeplex.com/license</licenseUrl>
     <projectUrl>http://nuget4msbuild.codeplex.com</projectUrl>
@@ -16,7 +16,7 @@
       <dependency id="NuGet.CommandLine" version="[3.3.0,)"/>
     </dependencies>
   </metadata>
-  <files>    
+  <files>
     <file src="NuGet.MSBuild.Tools\bin\Release\NuGet.for.MSBuild.targets" target="build" />
     <file src="NuGet.MSBuild.Tools\bin\Release\NuGet.for.MSBuild.tasks" target="build" />
     <file src="NuGet.MSBuild.Tools\bin\Release\NuGet.MSBuild.Tools.dll" target="build" />

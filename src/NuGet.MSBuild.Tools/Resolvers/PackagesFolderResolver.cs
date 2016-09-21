@@ -20,7 +20,7 @@ namespace NuGet.MSBuild.Tools.Resolvers
 
             foreach (var folder in folders)
             {
-                if (!folder.Name.StartsWith(NuGetConstants.NuGetCommandLine + "."))
+                if (!folder.Name.StartsWith(NuGetConstants.NuGetCommandLine))
                 {
                     continue;
                 }
