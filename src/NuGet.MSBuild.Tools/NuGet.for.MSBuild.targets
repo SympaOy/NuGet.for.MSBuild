@@ -29,7 +29,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
   <Target Name="ReadNuspecManifest" Condition=" Exists('$(ProjectNuspecFullPath)') ">
     <NuGet.MSBuild.Tools.ReadNuspecManifest Manifest="$(ProjectNuspecFullPath)">
       <Output TaskParameter="PackageId" PropertyName="PackageId"/>
-      <Output TaskParameter="PackageVersion" PropertyName="PackageVersion"/>
+      <Output Condition="'$(PackageVersion)' == ''" TaskParameter="PackageVersion" PropertyName="PackageVersion"/>
     </NuGet.MSBuild.Tools.ReadNuspecManifest>
   </Target>
 
