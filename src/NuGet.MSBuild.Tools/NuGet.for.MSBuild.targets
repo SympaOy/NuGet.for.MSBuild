@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+***********************************************************************************************
+NuGet.for.MSBuild.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+***********************************************************************************************
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory).\NuGet.for.MSBuild.tasks" />
+  
+  <PropertyGroup>
+    <!-- Enables or disables the building of the NuGet package. -->
+    <BuildNuGetPackage Condition=" '$(BuildNuGetPackage)' == '' And '$(Configuration)' == 'Release' ">true</BuildNuGetPackage>
+    
+    <!-- Enables or disables the building of the NuGet symbols package. -->
+    <BuildNuGetSymbolsPackage Condition=" '$(BuildNuGetSymbolsPackage)' == '' ">false</BuildNuGetSymbolsPackage>
+
+    <!-- Enables or disables the building of the NuGet package based on the contents of the nuspec file only. -->
+    <UseNuspecOnly Condition=" '$(UseNuspecOnly)' == '' ">false</UseNuspecOnly>
+
+    <ProjectNuspecFile Condition=" '$(ProjectNuspecFile)' == '' ">$(ProjectName).nuspec</ProjectNuspecFile>
+    <ProjectNuspecFullPath Condition=" '$(ProjectNuspecFullPath)' == '' ">$(ProjectDir)$(ProjectName).nuspec</ProjectNuspecFullPath>
+  </PropertyGroup>
+  
+  <Target Name="ReadNuspecManifest" Condition=" Exists('$(ProjectNuspecFullPath)') ">
+    <NuGet.MSBuild.Tools.ReadNuspecManifest Manifest="$(ProjectNuspecFullPath)">
+      <Output TaskParameter="PackageId" PropertyName="PackageId"/>
+      <Output TaskParameter="PackageVersion" PropertyName="PackageVersion"/>
+    </NuGet.MSBuild.Tools.ReadNuspecManifest>
+  </Target>
+
+  <Target Name="ReadAssemblyMetadata">
+    <NuGet.MSBuild.Tools.ReadAssemblyMetadata Assembly="$(TargetPath)" 
+                                              UseFileVersion="true" 
+                                              UseInfoVersion="true">
+      <Output TaskParameter="AssemblyVersion" PropertyName="AssemblyVersion"/>
+    </NuGet.MSBuild.Tools.ReadAssemblyMetadata>
+  </Target>
+
+  <PropertyGroup>
+    <GetPackageMetadataDependsOn>
+      ReadNuspecManifest;
+      ReadAssemblyMetadata;
+    </GetPackageMetadataDependsOn>
+  </PropertyGroup>
+
+  <Target Name="GetPackageMetadata" DependsOnTargets="$(GetPackageMetadataDependsOn)">
+    <CreateProperty Value="$(AssemblyName)" Condition=" '$(PackageId)' == '' OR '$(PackageId)' == '$id$' ">
+      <Output TaskParameter="Value" PropertyName="PackageId"/>
+    </CreateProperty>
+
+    <CreateProperty Value="$(AssemblyVersion)" Condition=" '$(PackageVersion)' == '' OR '$(PackageVersion)' == '$version$' ">
+      <Output TaskParameter="Value" PropertyName="PackageVersion"/>
+    </CreateProperty>
+
+    <CreateProperty Value="$(OutDir)$(PackageId).$(PackageVersion).nupkg">
+      <Output TaskParameter="Value" PropertyName="NupkgPackageFullPath"/>
+    </CreateProperty>
+
+    <CreateProperty Value="$(OutDir)$(PackageId).$(PackageVersion).symbols.nupkg">
+      <Output TaskParameter="Value" PropertyName="NupkgSymbolsPackageFullPath"/>
+    </CreateProperty>
+  </Target>
+  
+  <!--
+  ============================================================
+  CoreCreateNuGetPackage
+  ============================================================
+  -->
+  
+  <PropertyGroup>
+    <CoreCreateNuGetPackageDependsOn>
+      GetPackageMetadata;
+    </CoreCreateNuGetPackageDependsOn>
+  </PropertyGroup>  
+  
+  <Target Name="CoreCreateNuGetPackage" Condition=" '$(BuildNuGetPackage)' == 'true' "
+          DependsOnTargets="$(CoreCreateNuGetPackageDependsOn)">
+    <ItemGroup>
+      <NupkgPackOutputFiles Include="$(NupkgPackageFullPath)"/>
+    </ItemGroup>
+    <ItemGroup Condition=" '$(BuildNuGetSymbolsPackage)' == 'true' ">
+      <NupkgPackOutputFiles Include="$(NupkgSymbolsPackageFullPath)" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <CreateNuGetPackageTarget>$(MSBuildProjectFullPath)</CreateNuGetPackageTarget>
+      <CreateNuGetPackageTarget Condition=" '$(UseNuspecOnly)' == 'true' And Exists('$(ProjectNuspecFullPath)') ">$(ProjectNuspecFullPath)</CreateNuGetPackageTarget>
+    </PropertyGroup>
+    
+    <NuGet.MSBuild.Tools.Pack SolutionPath="$(SolutionPath)"
+                              Properties="Configuration=$(Configuration);Platform=$(Platform)"
+                              Target="$(CreateNuGetPackageTarget)"
+                              Version="$(PackageVersion)"
+                              OutputDirectory="$(OutDir)"
+                              Symbols="$(BuildNuGetSymbolsPackage)"
+                              BasePath="$(OutDir)"
+                              LogStandardErrorAsError="true"
+                              CustomSwitches="$(CustomNuGetPackSwitches)"/>
+
+    <ItemGroup>
+      <FileWrites Include="@(NupkgPackOutputFiles)"/>
+    </ItemGroup>
+  </Target>
+  
+  <!--
+  ============================================================
+  CreateNuGetPackage
+  ============================================================
+  -->
+
+  <PropertyGroup>
+    <CreateNuGetPackageDependsOn>
+      BeforeCreateNuGetPackage;
+      CoreCreateNuGetPackage;
+      AfterCreateNuGetPackage;
+    </CreateNuGetPackageDependsOn>
+  </PropertyGroup>
+
+  <Target Name="BeforeCreateNuGetPackage"/>
+  <Target Name="AfterCreateNuGetPackage"/>
+
+  <Target Name="CreateNuGetPackage" Condition=" '$(BuildNuGetPackage)' == 'true' "
+          DependsOnTargets="$(CreateNuGetPackageDependsOn)"/>
+
+  <!--
+  ============================================================
+  NupkgProjectOutputGroup
+  ============================================================
+  -->
+
+  <PropertyGroup>
+    <NupkgProjectOutputGroupDependsOn>
+      GetPackageMetadata;
+    </NupkgProjectOutputGroupDependsOn>
+  </PropertyGroup>
+
+  <Target Name="NupkgProjectOutputGroup"
+          DependsOnTargets="$(NupkgProjectOutputGroupDependsOn)"
+          Returns="@(NupkgProjectOutputGroupOutput)">
+
+    <ItemGroup>
+      <NupkgProjectOutputGroupOutput Include="$(NupkgPackageFullPath)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+  ============================================================
+  NupkgSymbolsOutputGroup
+  ============================================================
+  -->
+
+  <PropertyGroup>
+    <NupkgSymbolsOutputGroupDependsOn>
+      GetPackageMetadata;
+    </NupkgSymbolsOutputGroupDependsOn>
+  </PropertyGroup>
+
+  <Target Name="NupkgSymbolsOutputGroup"
+          DependsOnTargets="$(NupkgSymbolsOutputGroupDependsOn)"
+          Returns="@(NupkgSymbolsOutputGroupOutput)">
+
+    <ItemGroup>
+      <NupkgSymbolsOutputGroupOutput Include="$(NupkgSymbolsPackageFullPath)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+  ============================================================
+  Hook into the build targets.
+  ============================================================
+  -->
+
+  <PropertyGroup>
+    <PrepareForRunDependsOn>
+      $(PrepareForRunDependsOn);
+      CreateNuGetPackage;
+    </PrepareForRunDependsOn>
+  </PropertyGroup>
+  
+</Project>

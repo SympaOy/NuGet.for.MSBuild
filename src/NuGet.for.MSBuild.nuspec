@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+  <metadata minClientVersion="2.8">
+    <id>NuGet.for.MSBuild</id>
+    <title>NuGet for MSBuild</title>
+    <version>2.1.0</version>
+    <authors>Jeff Winn</authors>
+    <licenseUrl>http://nuget4msbuild.codeplex.com/license</licenseUrl>
+    <projectUrl>http://nuget4msbuild.codeplex.com</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <developmentDependency>true</developmentDependency>
+    <description>Provides MSBuild tasks around the NuGet command-line utility.</description>
+    <copyright>Copyright (c) Jeff Winn. All rights reserved.</copyright>
+    <tags>nuget msbuild build</tags>
+    <dependencies>
+      <dependency id="NuGet.CommandLine" version="[2.8.0,)"/>
+    </dependencies>
+  </metadata>
+  <files>    
+    <file src="NuGet.MSBuild.Tools\bin\Release\NuGet.for.MSBuild.targets" target="build" />
+    <file src="NuGet.MSBuild.Tools\bin\Release\NuGet.for.MSBuild.tasks" target="build" />
+    <file src="NuGet.MSBuild.Tools\bin\Release\NuGet.MSBuild.Tools.dll" target="build" />
+  </files>
+</package>

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+  <metadata>
+    <id>Test</id>
+    <version>1.0.0</version>
+    <title>Test Title</title>
+    <authors>Test Author</authors>
+    <owners>Test Owner</owners>
+    <description>This is a test package.</description>
+  </metadata>
+  <files>
+    <file src="FileA.dll" target="lib\net40"/>
+    <file src="FileA.xml" target="lib\net40"/>
+  </files>
+</package>
